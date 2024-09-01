@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 /// @title My contract from practicum two
 /// @author s0ffer
 /// @notice Here is my imaginary RPG shop mechanics contract

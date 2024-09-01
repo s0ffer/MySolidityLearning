@@ -1,0 +1,16 @@
+{
+  "name": "gitpractice",
+  "version": "1.0.0",
+  "description": "Currently:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.6",
+    "solc": "^0.8.20"
+  }
+}
