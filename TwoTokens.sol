@@ -2,21 +2,24 @@
 
 pragma solidity ^0.8.20;
 
-import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-interface IERC20 {
-    function name() external view returns(string memory);
-    function symbol() external view returns(string memory);
-    function decimals() external view returns(uint8);
-    function totalSupply() external view returns(uint256);
-    function balanceOf(address _owner) external view returns(uint256 balance);
-    function transfer(address _to, uint256 _value) external returns(bool success);
-    function transferFrom(address _from, address _to, uint256 _value) external returns(bool success);
-    function approve(address _spender, uint256 _value) external returns(bool success);
-    function allowance(address _owner, address _spender) external view returns(uint256 remaining);
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-}
+
+/// @dev interface of IERC20 already imported in SafeERC20 file.
+// interface IERC20 {
+//     function name() external view returns(string memory);
+//     function symbol() external view returns(string memory);
+//     function decimals() external view returns(uint8);
+//     function totalSupply() external view returns(uint256);
+//     function balanceOf(address _owner) external view returns(uint256 balance);
+//     function transfer(address _to, uint256 _value) external returns(bool success);
+//     function transferFrom(address _from, address _to, uint256 _value) external returns(bool success);
+//     function approve(address _spender, uint256 _value) external returns(bool success);
+//     function allowance(address _owner, address _spender) external view returns(uint256 remaining);
+//     event Transfer(address indexed _from, address indexed _to, uint256 _value);
+//     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+// }
 
 /// @title base contract ERC20 
 /// @author s0ffer
@@ -117,6 +120,8 @@ abstract contract ERC20 is IERC20 {
     /// @return `success` boolean.
     function approve(address _spender, uint256 _value) public returns(bool success) {
         uint256 currentAllowance = _allowances[msg.sender][_spender];
+        require(_spender != address(0), "InvalidSpender");
+        require(msg.sender != address(0), "InvalidApprover");
         if (currentAllowance > _value) {
             (, uint256 newValue) = currentAllowance.trySub(_value);
             _allowances[msg.sender][_spender] = newValue;
@@ -165,6 +170,7 @@ abstract contract ERC20 is IERC20 {
     /// @param `value` amount of tokens to mint.
     /// @return `success` boolean.
     function mint(address to, uint256 value) public onlyOwner returns(bool success) {
+        require(to != address(0));
         _update(address(0), to, value);
         return true;
     }
@@ -175,6 +181,7 @@ abstract contract ERC20 is IERC20 {
     /// @param `_value` amount of tokens to burn.
     /// @return `success` boolean.
     function burn(address from, uint256 value) public onlyOwner returns(bool success) {
+        require(from != address(0));
         _update(from, address(0), value);
         return true;
     }
@@ -211,15 +218,19 @@ contract COIN is ERC20 {
 /// @dev for proper work address of `buy` this contract must have balances in both tokens. 
 /// @dev for `swap` user must approve balance to this contract
 contract TokenSwap {
+    using SafeERC20 for IERC20;
+
+    address payable public owner;
 
     IERC20 cusdToken;
     IERC20 coinToken;
 
     event Swap(address indexed from, uint256 amountIn, uint256 amountOut);
 
-    constructor(address _CUSD, address _COIN) {
+    constructor(address _CUSD, address _COIN, address _owner) {
         cusdToken = IERC20(_CUSD);
         coinToken = IERC20(_COIN);
+        owner = payable(_owner);
     }
 
     /// @title Consumes ETH, transfers equal amount of the token, 1 wei == 1 token. 
@@ -228,10 +239,13 @@ contract TokenSwap {
     /// @return 'success' boolean. 
     function buy(address tokenAddress) public payable returns(bool success) {
         if (tokenAddress == address(cusdToken)) {
-            cusdToken.transfer(msg.sender, (msg.value / (10 ** 12)));
-        }
-        if (tokenAddress == address(coinToken)) {
-            coinToken.transfer(msg.sender, msg.value);
+            require(cusdToken.balanceOf(address(this)) > msg.value, "Insufficient balance in contract");
+            cusdToken.safeTransfer(msg.sender, (msg.value / (10 ** 12)));
+        } else if (tokenAddress == address(coinToken)) {
+            require(coinToken.balanceOf(address(this)) > msg.value, "Insufficient balance in contract");
+            coinToken.safeTransfer(msg.sender, msg.value);
+        } else {
+            revert("Invalid token address");
         }
         return true;
     }
@@ -242,18 +256,31 @@ contract TokenSwap {
     /// @param `amountA` uint256 input amount swap for.
     /// @return 'success' boolean. 
     function swap(address tokenA, uint256 amountA) public returns(bool success) {
-        if (tokenA == address(cusdToken)) {
-            cusdToken.transferFrom(msg.sender, address(this), amountA);
-            uint256 amountB = amountA * (10 ** 12);
-            coinToken.transfer(msg.sender, amountB);
-            emit Swap(msg.sender, amountA, amountB);
-        }
-        if(tokenA == address(coinToken)) {
-            coinToken.transferFrom(msg.sender, address(this), amountA);
-            uint256 amountB = amountA / (10 ** 12);
-            cusdToken.transfer(msg.sender, amountB);
-            emit Swap(msg.sender, amountA, amountB);
-        }
+        bool isCusdToken = tokenA == address(cusdToken);
+        
+        isCusdToken 
+            ? cusdToken.safeTransferFrom(msg.sender, address(this), amountA) 
+            : coinToken.safeTransferFrom(msg.sender, address(this), amountA);
+
+        uint256 amountB = isCusdToken 
+            ? amountA * (10 ** 12) 
+            : amountA / (10 ** 12);
+
+        isCusdToken 
+            ? cusdToken.safeTransfer(msg.sender, amountB) 
+            : coinToken.safeTransfer(msg.sender, amountB);
+
+        emit Swap(msg.sender, amountA, amountB);
         return true;
+    }
+
+
+    /// @title Withdraw all eth from the contract to the owner account.
+    /// @dev Require the contract balance greater than zero.
+    function withdrawAll() public {
+        require(msg.sender == owner, "Not the contract owner!");
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+        owner.transfer(balance);
     }
 }
