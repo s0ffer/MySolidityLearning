@@ -82,17 +82,17 @@ abstract contract ERC20 is IERC20 {
 
     /// @notice Returns the balance of account.
     /// @dev Balances stored in `_balances` mapping by key: address
-    /// @param `_owner` address of whose balance to see.
-    /// @return `balance` uint256 balance of account.  
+    /// @param _owner address of whose balance to see.
+    /// @return balance uint256 balance of account.  
     function balanceOf(address _owner) public view returns(uint256 balance) {
         return _balances[_owner];
     }
 
     /// @notice Transfers `_value` amount tokens to `_to`.
     /// @dev Require `_value` greater than balance of the sender.
-    /// @param `_to` address to transfer tokens.
-    /// @param `_value` amount of token to transfer.
-    /// @return `success` boolean. 
+    /// @param _to address to transfer tokens.
+    /// @param _value amount of token to transfer.
+    /// @return success boolean. 
     function transfer(address _to, uint256 _value) external returns(bool success) {
         require(_balances[msg.sender] >= _value, "Insufficient balance of sender");
         _update(msg.sender, _to, _value);
@@ -101,10 +101,10 @@ abstract contract ERC20 is IERC20 {
 
     /// @notice Transfers `_value` amount tokens from `_from` to `_to`.
     /// @dev Require left allowance greater than `_value` and `_value` greater than balance of the sender
-    /// @param `_from` address transfering tokens from.
-    /// @param `_to` address to transfer tokens.
-    /// @param `_value` amount of token to transfer.
-    /// @return `success` boolean. 
+    /// @param _from address transfering tokens from.
+    /// @param _to address to transfer tokens.
+    /// @param _value amount of token to transfer.
+    /// @return success boolean. 
     function transferFrom(address _from, address _to, uint256 _value) external returns(bool success) {
         require(_allowances[_from][msg.sender] >= _value, "Insufficient allowance for this account");
         require(_balances[_from] >= _value, "Insufficient balance of account for transferFrom");
@@ -115,9 +115,9 @@ abstract contract ERC20 is IERC20 {
 
     /// @notice Approve to spend some amount of tokens to the spender.
     /// @dev checking current allowance of spender, decreases or increases allowance if greater or smaller. Emits event `Approval`.
-    /// @param `_spender` address to who approve spend tokens.
-    /// @param `_value` amount of token to approve.
-    /// @return `success` boolean.
+    /// @param _spender address to who approve spend tokens.
+    /// @param _value amount of token to approve.
+    /// @return success boolean.
     function approve(address _spender, uint256 _value) public returns(bool success) {
         uint256 currentAllowance = _allowances[msg.sender][_spender];
         require(_spender != address(0), "InvalidSpender");
@@ -138,18 +138,18 @@ abstract contract ERC20 is IERC20 {
 
     /// @notice Returns left allowance for spender from owners account.
     /// @dev allowance stored in `_allowances` mapping by key: address => address.
-    /// @param `_owner` address of account.
-    /// @param `_spender` address who got allowance.
-    /// @return `remaining` uint256 allowance left.
+    /// @param _owner address of account.
+    /// @param _spender address who got allowance.
+    /// @return remaining uint256 allowance left.
     function allowance(address _owner, address _spender) public view returns(uint256 remaining) {
         return _allowances[_owner][_spender];
     }
 
     /// @notice Updates balances.
     /// @dev if `_from` zero address -> mint, if `to` zero address -> burn. Emits event `Transfer`.
-    /// @param `_from` address tokens transfer from.
-    /// @param `_to` address tokens transfer to.
-    /// @param `_value` amount of tokens to transfer.
+    /// @param _from address tokens transfer from.
+    /// @param _to address tokens transfer to.
+    /// @param _value amount of tokens to transfer.
     function _update(address _from, address _to, uint256 _value) internal virtual {
         if (_from == address(0)) {
             _totalSupply += _value;
@@ -166,9 +166,9 @@ abstract contract ERC20 is IERC20 {
 
     /// @notice Create tokens.
     /// @dev Sets `from` to zero address in update args for mint. Function only for owner.
-    /// @param `to` address tokens transfer to.
-    /// @param `value` amount of tokens to mint.
-    /// @return `success` boolean.
+    /// @param to address tokens transfer to.
+    /// @param value amount of tokens to mint.
+    /// @return success boolean.
     function mint(address to, uint256 value) public onlyOwner returns(bool success) {
         require(to != address(0));
         _update(address(0), to, value);
@@ -177,9 +177,9 @@ abstract contract ERC20 is IERC20 {
 
     /// @notice Remove tokens.
     /// @dev Sets `to` to zero address in update args for burn. Function only for owner.
-    /// @param `from` address tokens transfer from.
-    /// @param `_value` amount of tokens to burn.
-    /// @return `success` boolean.
+    /// @param from address tokens transfer from.
+    /// @param value amount of tokens to burn.
+    /// @return success boolean.
     function burn(address from, uint256 value) public onlyOwner returns(bool success) {
         require(from != address(0));
         _update(from, address(0), value);
@@ -194,9 +194,9 @@ abstract contract ERC20 is IERC20 {
 /// @dev decimals 6, similar to USDT, USDC tokens
 contract CUSD is ERC20 {
 
-    /// @title Uses contructor for initiate ERC20 constructor to set variables.
+    /// Uses contructor for initiate ERC20 constructor to set variables.
     /// @dev Decimals set to 6
-    /// @param `initialOwner` address of the token owner. 
+    /// @param initialOwner address of the token owner. 
     constructor(address initialOwner) ERC20(initialOwner, "Coin USD", "CUSD", 6) {}
 }
 
@@ -206,9 +206,9 @@ contract CUSD is ERC20 {
 /// @dev decimals 18, similar to native ETH token
 contract COIN is ERC20 {
 
-    /// @title Uses contructor for initiate ERC20 constructor to set variables.
+    /// Uses contructor for initiate ERC20 constructor to set variables.
     /// @dev Decimals set to 18
-    /// @param `initialOwner` address of the token owner. 
+    /// @param initialOwner address of the token owner. 
     constructor(address initialOwner) ERC20(initialOwner, "Coin native", "COIN", 18) {}
 }
 
@@ -233,10 +233,10 @@ contract TokenSwap {
         owner = payable(_owner);
     }
 
-    /// @title Consumes ETH, transfers equal amount of the token, 1 wei == 1 token. 
+    /// Consumes ETH, transfers equal amount of the token, 1 wei == 1 token. 
     /// @dev This contract needs to have that amount of tokens. Mint them. Compares `tokenAddress` to CUSD and COIN token addresses.
-    /// @param `tokenAddress` address of the token.
-    /// @return 'success' boolean. 
+    /// @param tokenAddress address of the token.
+    /// @return success boolean. 
     function buy(address tokenAddress) public payable returns(bool success) {
         if (tokenAddress == address(cusdToken)) {
             require(cusdToken.balanceOf(address(this)) > msg.value, "Insufficient balance in contract");
@@ -250,11 +250,11 @@ contract TokenSwap {
         return true;
     }
 
-    /// @title Consume tokenA amount of a tokens, transfers equal tokenB amount to the sender.
+    /// Consume tokenA amount of a tokens, transfers equal tokenB amount to the sender.
     /// @dev Compares `tokenA` address to CUSD and COIN token addresses. Emits `Swap` event.
-    /// @param `tokenA` address of the input token.
-    /// @param `amountA` uint256 input amount swap for.
-    /// @return 'success' boolean. 
+    /// @param tokenA address of the input token.
+    /// @param amountA uint256 input amount swap for.
+    /// @return success boolean. 
     function swap(address tokenA, uint256 amountA) public returns(bool success) {
         bool isCusdToken = tokenA == address(cusdToken);
         
@@ -275,7 +275,7 @@ contract TokenSwap {
     }
 
 
-    /// @title Withdraw all eth from the contract to the owner account.
+    /// Withdraw all eth from the contract to the owner account.
     /// @dev Require the contract balance greater than zero.
     function withdrawAll() public {
         require(msg.sender == owner, "Not the contract owner!");
