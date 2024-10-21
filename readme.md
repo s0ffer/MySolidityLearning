@@ -8,4 +8,6 @@ Currently:
 
 -> `TwoTokens.sol` Manually writed ERC-20 implementation of base contract. Created two tokens with different decimals for experiments. Implemented potato-dex with `buy` and `swap` functions of those two tokens. Needs huge work with security.
 
--> `MyNFTERC721.sol` Manually writed ERC-721 implementation from openzeppelin and interfacess. Created NFT contract and minted first 10 tokens. All functions work correctly. [19.10.2024]
+-> `MyNFTERC721.sol` Manually writed ERC-721 implementation from openzeppelin and interfacess. Created NFT contract and minted first 10 tokens. All functions work correctly. [19.10.2024] FOR JUST PRACTICE
+
+-> `MyNFTContract.sol` Simple NFT contract with OZ imports, added mapping for storing tokenURI's. [21.10.2024]
