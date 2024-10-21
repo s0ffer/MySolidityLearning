@@ -295,13 +295,14 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
 
-    /** @dev check if `to ` it's a smart-contract, 
-     *  if so check for supporting IERC721Receiver interface
-     *  @param from address of the owner
-     *  @param to address transfer token to
-     *  @param tokenId id of the token
-     *  @param data bytes to pass further to function call
-     *  @return true if `to` ERC721 Receiver
+    /**
+     * @dev check if `to ` it's a smart-contract, 
+     * if so check for supporting IERC721Receiver interface
+     * @param from address of the owner
+     * @param to address transfer token to
+     * @param tokenId id of the token
+     * @param data bytes to pass further to function call
+     * @return true if `to` ERC721 Receiver
      */
     function _checkOnERC721Receiver( 
         address from, 

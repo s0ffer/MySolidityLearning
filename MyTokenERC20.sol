@@ -18,7 +18,7 @@ contract MyToken is ERC20, ERC20Burnable, Ownable, ERC20Permit {
 
     constructor()
         ERC20("SofferCoin", "SFR")
-        Ownable()
+        Ownable(msg.sender)
         ERC20Permit("SofferCoin")
     {
         feeRecipient = msg.sender;
@@ -28,9 +28,9 @@ contract MyToken is ERC20, ERC20Burnable, Ownable, ERC20Permit {
         _mint(to, amount);
     }
 
-    function _update(address from, address to, uint256 value) internal virtual {
+    function _update(address from, address to, uint256 value) internal virtual override {
         uint256 fee = (value / 100);
-        _balances[feeRecipient] = fee;
+        feeBank += fee;
         _update(from, to, (value - fee));
     }   
 }

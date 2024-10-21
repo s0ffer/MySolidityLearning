@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 
@@ -27,7 +27,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 /// @dev my practice in implementation of ERC20 standart
 abstract contract ERC20 is IERC20 {
 
-    using SafeMath for uint256;
+    using Math for uint256;
     
     constructor(address owner_, string memory name_, string memory symbol_, uint8 decimals_) {
         owner = owner_;

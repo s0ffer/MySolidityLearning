@@ -6,7 +6,7 @@ pragma solidity ^0.8.20;
 /// @dev Only for education, practice writing fucntions, data types
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PracticumTwo is Ownable() {
+contract PracticumTwo is Ownable(msg.sender) {
     // Creating structures
     struct Payment {
         uint amount;

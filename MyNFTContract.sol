@@ -30,5 +30,4 @@ contract MyNFT is ERC721Burnable {
         _requireOwned(tokenId);
         return _tokensURI[tokenId];
     }
-
 }
